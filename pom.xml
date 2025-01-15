@@ -4,35 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>html-project</artifactId>
+    <artifactId>myproject</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Servlet API for web applications -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-            <scope>provided</scope>
-        </dependency>
+        <!-- Add project dependencies here -->
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Maven War Plugin for packaging web applications -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>src/main/webapp</directory>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
+            <!-- Add build plugins here -->
         </plugins>
     </build>
 </project>
