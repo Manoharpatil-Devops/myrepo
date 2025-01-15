@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Update the system
+echo "Updating system packages..."
+sudo yum update -y
+
+# Import Amazon Corretto GPG key
+echo "Importing Amazon Corretto GPG key..."
+sudo rpm --import https://yum.corretto.aws/corretto.key
+
+# Add Amazon Corretto repository
+echo "Adding Amazon Corretto repository..."
+sudo curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+
+# Install Amazon Corretto 17
+echo "Installing Amazon Corretto 17..."
+sudo yum install -y java-17-amazon-corretto-devel
+
+# Update alternatives to set Java 17 as default
+echo "Updating alternatives to set Java 17 as default..."
+sudo alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-amazon-corretto/bin/java 1
+sudo
