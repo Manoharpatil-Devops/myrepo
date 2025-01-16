@@ -1,45 +1,42 @@
 #!/bin/bash
 
-# Update the system and install necessary tools
-echo "Updating the system..."
-sudo yum update -y
-
-# Install wget if not installed
-echo "Installing wget..."
-sudo yum install -y wget
-
-# Install tar if not installed (for extracting Maven)
-echo "Installing tar..."
-sudo yum install -y tar
-
-# Set Maven version and URL
+# Set the path for the myrepo folder
+REPO_DIR="/path/to/myrepo"
 MAVEN_VERSION="3.9.9"
-MAVEN_HOME="/opt/apache-maven-$MAVEN_VERSION"
 MAVEN_TAR="apache-maven-$MAVEN_VERSION-bin.tar.gz"
 MAVEN_URL="https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TAR"
 
-# Download Maven 3.9.9 binary
+# Ensure the directory exists
+if [ ! -d "$REPO_DIR" ]; then
+  echo "The directory $REPO_DIR does not exist. Exiting."
+  exit 1
+fi
+
+# Navigate to the myrepo directory
+cd $REPO_DIR
+
+# Download Maven binary
 echo "Downloading Maven $MAVEN_VERSION..."
-wget $MAVEN_URL -P /tmp
+wget $MAVEN_URL
 
-# Extract the Maven archive
+# Extract the downloaded tar.gz file
 echo "Extracting Maven..."
-sudo tar -xvzf /tmp/$MAVEN_TAR -C /opt
+tar -xvzf $MAVEN_TAR
 
-# Set environment variables for Maven
+# Set up Maven environment variables
 echo "Setting up Maven environment variables..."
-echo "export MAVEN_HOME=$MAVEN_HOME" >> ~/.bash_profile
+echo "export MAVEN_HOME=$REPO_DIR/apache-maven-$MAVEN_VERSION" >> ~/.bash_profile
 echo "export PATH=\$MAVEN_HOME/bin:\$PATH" >> ~/.bash_profile
 
-# Apply the changes to the current session
+# Apply the changes
 source ~/.bash_profile
 
 # Verify Maven installation
-echo "Maven installation completed. Verifying version..."
+echo "Verifying Maven installation..."
 mvn -version
 
-# Clean up downloaded files
+# Clean up the downloaded tar.gz file
 echo "Cleaning up..."
-rm -f /tmp/$MAVEN_TAR
+rm -f $MAVEN_TAR
 
-echo "Maven $MAVEN_VERSION installed successfully!"
+echo "Maven $MAVEN_VERSION installed successfully in $REPO_DIR!"
