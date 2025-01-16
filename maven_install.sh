@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the path for the myrepo folder
-REPO_DIR="/path/to/myrepo"
+REPO_DIR="/home/ec2-user/"
 MAVEN_VERSION="3.9.9"
 MAVEN_TAR="apache-maven-$MAVEN_VERSION-bin.tar.gz"
 MAVEN_URL="https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/$MAVEN_TAR"
