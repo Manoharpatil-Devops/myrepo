@@ -1,0 +1,58 @@
+pipeline {
+    agent any  // Runs on any available agent
+
+    parameters {
+        // Choice parameter for selecting which script to run
+        choice(name: 'SCRIPT_TO_RUN', choices: ['Availability_reload', 'Commits_reload', 'Capacity_reload'], description: 'Choose the script to run on the EC2 instance')
+    }
+
+    environment {
+        // EC2 instance public IP address
+        EC2_PUBLIC_IP = '54.234.128.90'  // Replace with the EC2 instance's public IP address
+
+        // SSH credentials ID stored in Jenkins Credentials Plugin
+        SSH_CREDENTIALS_ID = 'VM_Keys'  // The ID of your Jenkins SSH credentials
+    }
+
+    stages {
+        stage('Run Script on EC2 Instance') {
+            steps {
+                script {
+                    // Define the script to run based on user input
+                    def scriptToRun = ''
+                    if (SCRIPT_TO_RUN == 'Availability_reload') {
+                        scriptToRun = 'bash Availability_reload.sh'
+                    } else if (SCRIPT_TO_RUN == 'Commits_reload') {
+                        scriptToRun = 'bash Commits_reload.sh'
+                    } else if (SCRIPT_TO_RUN == 'Capacity_reload') {
+                        scriptToRun = 'bash Capacity_reload.sh'
+                    }
+
+                    // Use SSH credentials stored in Jenkins to connect to the EC2 instance and run the selected script
+                    echo "Connecting to EC2 instance at ${EC2_PUBLIC_IP} and running the selected script..."
+
+                    sshagent([SSH_CREDENTIALS_ID]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ec2-user@${EC2_PUBLIC_IP} 'sudo su -c "cd /home/ec2-user && ${scriptToRun}"'
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // This block runs after the pipeline completes
+            echo "Pipeline completed."
+        }
+        success {
+            // This block runs if the pipeline succeeds
+            echo "Script executed successfully on EC2 instance."
+        }
+        failure {
+            // This block runs if the pipeline fails
+            echo "An error occurred while running the script on EC2."
+        }
+    }
+}
