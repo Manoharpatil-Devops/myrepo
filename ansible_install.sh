@@ -11,4 +11,4 @@ echo "Key Generated"
 echo "Please set root user password"
 passwd root
 echo "Changing the permission of the ssh"
-vim /etct/ssh/sshd
+vim /etc/ssh/sshd
