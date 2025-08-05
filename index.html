@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apache Server Running</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            text-align: center;
+        }
+
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        h1 {
+            margin-top: 100px;
+            font-size: 3em;
+        }
+
+        .status {
+            font-size: 1.8em;
+            margin-top: 30px;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .my-image {
+            width: 300px;
+            border-radius: 20px;
+            margin-top: 40px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            background-color: #ffffff22;
+            color: white;
+            border: 1px solid white;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Apache Web Server is Online!</h1>
+    <p>Welcome to my animated Apache test page 🎉</p>
+
+    <div class="emoji">🔥🌐💻</div>
+
+    <div class="status">✅ Status: Running Smoothly</div>
+
+    <!-- Reliable random image -->
+    <img src="https://picsum.photos/400/300" alt="Random Image" class="my-image">
+
+    <!-- Music Button -->
+    <button onclick="document.getElementById('bg-music').play()">▶️ Play Background Music</button>
+
+    <!-- Hidden Audio -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/31/audio_f1966a87f5.mp3?filename=relaxing-music-ambient-11749.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>
