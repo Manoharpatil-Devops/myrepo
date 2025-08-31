@@ -1,54 +1,62 @@
-name: Deploy Jenkins to AWS EC2
+name: Deploy Jenkins to EC2
 
 on:
-  workflow_dispatch:   # allows manual trigger
   push:
     branches:
-      - docker        # run only when you push to docker branch
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REGISTRY: 971422682418.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: jenkins
-  IMAGE_TAG: latest
+      - docker   # Change if you want another branch
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Configure AWS credentials from GitHub Secrets
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1   # ✅ your AWS region
 
-      # Login to ECR
       - name: Login to Amazon ECR
+        id: login-ecr
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          aws ecr get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin 971422682418.dkr.ecr.us-east-1.amazonaws.com
 
-      # Build & Push image
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, Tag, and Push Image to ECR
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          IMAGE_TAG=latest
+          ECR_REGISTRY=971422682418.dkr.ecr.us-east-1.amazonaws.com
+          ECR_REPOSITORY=jenkins
+
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # Deploy on EC2
-      - name: Deploy to EC2
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            export AWS_REGION=us-east-1
+            export ECR_REGISTRY=971422682418.dkr.ecr.us-east-1.amazonaws.com
+            export ECR_REPOSITORY=jenkins
+            export IMAGE_TAG=latest
+
+            # Login to ECR inside EC2
             docker login -u AWS -p $(aws ecr get-login-password --region $AWS_REGION) $ECR_REGISTRY
+
+            # Pull latest image
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+            # Stop & remove old container if running
             docker stop jenkins || true
             docker rm jenkins || true
+
+            # Run new container
             docker run -d --name jenkins -p 8080:8080 -p 50000:50000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
