@@ -1,9 +1,9 @@
-name: Deploy Jenkins to AWS
+name: Deploy Jenkins on EC2
 
 on:
   push:
     branches:
-      - docker   # workflow runs only on push to main branch
+      - docker
 
 jobs:
   deploy:
@@ -13,7 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 1: Configure AWS credentials (from GitHub secrets)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -21,23 +20,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Step 2: Login to Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 3: Build & Push Jenkins Docker image
-      - name: Build and Push Docker image
+      - name: Build and Push Docker image to ECR
         run: |
           IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
           echo "Building image $IMAGE_URI"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
-      # Step 4: Deploy to ECS (force new deployment)
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service \
-            --cluster my-ecs-cluster \
-            --service jenkins-service \
-            --force-new-deployment
+      - name: Deploy on EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+            docker stop jenkins || true
+            docker rm jenkins || true
+            docker run -d --name jenkins -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
