@@ -43,4 +43,3 @@ jobs:
             docker stop jenkins || true
             docker rm jenkins || true
             docker run -d --name jenkins -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
-
